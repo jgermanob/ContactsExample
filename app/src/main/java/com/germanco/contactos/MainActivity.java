@@ -10,6 +10,9 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ListView;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,6 +24,7 @@ public class MainActivity extends AppCompatActivity {
     AdaptadorContacto adaptadorContacto;
     Button botonGuardar;
     public List<Contacto> contactosGuardados= new ArrayList<>();
+    Gson gson;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,5 +71,8 @@ public class MainActivity extends AppCompatActivity {
                 Log.d("Contacto guardado",contactoList.get(i).getNombre());
             }
         }
+        gson= new GsonBuilder().setPrettyPrinting().create();
+        String representacionJsonContactos=gson.toJson(contactosGuardados);
+        System.out.println("JSON:\n"+representacionJsonContactos);
     }
 }
