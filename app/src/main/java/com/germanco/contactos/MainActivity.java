@@ -1,7 +1,12 @@
 package com.germanco.contactos;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.database.CursorIndexOutOfBoundsException;
 import android.net.Uri;
+import android.preference.PreferenceManager;
+import android.provider.CalendarContract;
 import android.provider.ContactsContract;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -25,7 +30,9 @@ public class MainActivity extends AppCompatActivity {
     Button botonGuardar;
     public List<Contacto> contactosGuardados= new ArrayList<>();
     Gson gson;
-
+    SharedPreferences sharedPreferences;
+    SharedPreferences.Editor editor;
+    Intent intent;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -34,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
         botonGuardar=(Button)findViewById(R.id.botonGuardar);
         adaptadorContacto= new AdaptadorContacto(this,contactoList);
         listaContactos.setAdapter(adaptadorContacto);
+        intent = new Intent(MainActivity.this,RecuperaContactos.class);
         obtenerContactos();
         botonGuardar.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -45,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void obtenerContactos(){
-        String[] projection= new String[]{ContactsContract.Data._ID,ContactsContract.Data.DISPLAY_NAME, ContactsContract.CommonDataKinds.Phone.NUMBER, ContactsContract.CommonDataKinds.Phone.TYPE};
+        String[] projection= new String[]{ContactsContract.Data.DISPLAY_NAME, ContactsContract.CommonDataKinds.Phone.NUMBER, ContactsContract.CommonDataKinds.Phone.TYPE};
         String where= ContactsContract.Data.MIMETYPE+"='"+ ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE+"' AND "+ ContactsContract.CommonDataKinds.Phone.NUMBER+ " IS NOT NULL";
         String orden= ContactsContract.Data.DISPLAY_NAME+" ASC";
         contactoCursor=getContentResolver().query(ContactsContract.Data.CONTENT_URI,projection,where,null,orden);
@@ -53,13 +61,14 @@ public class MainActivity extends AppCompatActivity {
             try {
                 contactoCursor.moveToNext();
                 contacto= new Contacto();
-                contacto.setNombre(contactoCursor.getString(1));
-                contacto.setTelefono(contactoCursor.getString(2));
+                contacto.setNombre(contactoCursor.getString(0));
+                contacto.setTelefono(contactoCursor.getString(1));
                 contacto.setSelected(false);
                 contactoList.add(contacto);
                 adaptadorContacto.notifyDataSetChanged();
-            }catch (NullPointerException ex){
-                Log.d("Estado",contactoCursor.getString(0));
+            }catch (CursorIndexOutOfBoundsException ex){
+                ex.printStackTrace();
+//                Log.d("Estado",contactoCursor.getString(0));
             }
         }
     }
@@ -72,7 +81,14 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         gson= new GsonBuilder().setPrettyPrinting().create();
-        String representacionJsonContactos=gson.toJson(contactosGuardados);
-        System.out.println("JSON:\n"+representacionJsonContactos);
+        String jsonContactos=gson.toJson(contactosGuardados);
+        System.out.println("JSON:\n"+jsonContactos);
+        //Guarda JSON con lista de contactos seleccionada
+        sharedPreferences= PreferenceManager.getDefaultSharedPreferences(this);
+        editor=sharedPreferences.edit();
+        editor.putString("lista",jsonContactos);
+        editor.commit();
+        startActivity(intent);
+
     }
 }
