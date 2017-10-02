@@ -39,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         listaContactos= (ListView)findViewById(R.id.contactsList);
         botonGuardar=(Button)findViewById(R.id.botonGuardar);
+        isFirstTIme();
         adaptadorContacto= new AdaptadorContacto(this,contactoList);
         listaContactos.setAdapter(adaptadorContacto);
         intent = new Intent(MainActivity.this,RecuperaContactos.class);
@@ -53,16 +54,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void obtenerContactos(){
-        String[] projection= new String[]{ContactsContract.Data.DISPLAY_NAME, ContactsContract.CommonDataKinds.Phone.NUMBER, ContactsContract.CommonDataKinds.Phone.TYPE};
+        String[] projection= new String[]{ContactsContract.Data._ID,ContactsContract.Data.DISPLAY_NAME, ContactsContract.CommonDataKinds.Phone.NUMBER, ContactsContract.CommonDataKinds.Phone.TYPE};
         String where= ContactsContract.Data.MIMETYPE+"='"+ ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE+"' AND "+ ContactsContract.CommonDataKinds.Phone.NUMBER+ " IS NOT NULL";
         String orden= ContactsContract.Data.DISPLAY_NAME+" ASC";
         contactoCursor=getContentResolver().query(ContactsContract.Data.CONTENT_URI,projection,where,null,orden);
         while (contactoCursor.moveToNext()){
             try {
                 contactoCursor.moveToNext();
-                contacto= new Contacto();
-                contacto.setNombre(contactoCursor.getString(0));
-                contacto.setTelefono(contactoCursor.getString(1));
+                contacto= new Contacto();contacto.setIdContacto(contactoCursor.getString(0));
+                contacto.setNombre(contactoCursor.getString(1));
+                contacto.setTelefono(contactoCursor.getString(2));
                 contacto.setSelected(false);
                 contactoList.add(contacto);
                 adaptadorContacto.notifyDataSetChanged();
@@ -90,5 +91,21 @@ public class MainActivity extends AppCompatActivity {
         editor.commit();
         startActivity(intent);
 
+    }
+
+    //Muestra sólo una vez la actividad para guardar contactos
+    public void isFirstTIme(){
+        SharedPreferences preferences=getPreferences(MODE_PRIVATE);
+        boolean isFirst=preferences.getBoolean("isFirst",false);
+        if(isFirst==false){
+            Log.d("Estado","Es la primera vez");
+            SharedPreferences.Editor editor=preferences.edit();
+            editor.putBoolean("isFirst",true);
+            editor.commit();
+        }else {
+            Log.d("Estado","No es la primera vez");
+            Intent intent= new Intent(MainActivity.this,RecuperaContactos.class);
+            startActivity(intent);
+        }
     }
 }

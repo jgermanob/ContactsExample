@@ -10,4 +10,18 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.germanco.contactos.RecuperaContactos">
 
+    <EditText
+        android:id="@+id/mensaje"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:hint="Introduce Mensaje"/>
+
+    <Button
+        android:id="@+id/botonMensaje"
+        android:layout_width="200dp"
+        android:layout_height="50dp"
+        android:text="Enviar Mensaje"
+        android:layout_below="@+id/mensaje"
+        android:layout_centerHorizontal="true"/>
+
 </RelativeLayout>

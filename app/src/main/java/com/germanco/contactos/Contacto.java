@@ -4,6 +4,15 @@ public class Contacto {
     String nombre;
     String telefono;
     Boolean isSelected;
+    String idContacto;
+
+    public String getIdContacto() {
+        return idContacto;
+    }
+
+    public void setIdContacto(String idContacto) {
+        this.idContacto = idContacto;
+    }
 
     public String getNombre() {return nombre;}
 
