@@ -8,7 +8,9 @@ import android.telephony.SmsManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.json.JSONArray;
@@ -26,6 +28,7 @@ public class RecuperaContactos extends AppCompatActivity {
     Button botonMensaje;
     SmsManager smsManager;
     String stringMensaje;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,6 +49,7 @@ public class RecuperaContactos extends AppCompatActivity {
         });
     }
 
+    //Obtiene la lista de contactos guardados por usuario almacenada con SharedPreferences
     public String recuperaContactos(){
         preferences= PreferenceManager.getDefaultSharedPreferences(this);
         jsonContactos=preferences.getString("lista","vacio");
@@ -53,6 +57,7 @@ public class RecuperaContactos extends AppCompatActivity {
         return jsonContactos;
     }
 
+    //Guard los telefonos de los contactos en una lista para enviar un mensaje a cada uno de ellos
     public void leeJSON(String json){
         try {
             JSONArray jsonArray= new JSONArray(json);
@@ -67,12 +72,12 @@ public class RecuperaContactos extends AppCompatActivity {
         }
     }
 
+    //Envia mensaje a los contactos seleccionados
     public void enviarMensaje(String mensaje){
         smsManager=SmsManager.getDefault();
         for(int i=0; i<telefonosContactos.size();i++){
             smsManager.sendTextMessage(telefonosContactos.get(i),null,mensaje,null,null);
+            Log.d("Mensaje:"+mensaje,"Contacto:"+telefonosContactos.get(i));
         }
     }
-
-
 }

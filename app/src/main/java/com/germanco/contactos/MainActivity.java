@@ -40,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
         listaContactos= (ListView)findViewById(R.id.contactsList);
         botonGuardar=(Button)findViewById(R.id.botonGuardar);
         isFirstTIme();
-        adaptadorContacto= new AdaptadorContacto(this,contactoList);
+        adaptadorContacto= new AdaptadorContacto(this,contactoList,this);
         listaContactos.setAdapter(adaptadorContacto);
         intent = new Intent(MainActivity.this,RecuperaContactos.class);
         obtenerContactos();
@@ -53,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    //Obtiene la información de los contactos del dispositivo, ordenandolos alfabeticamente y guardarndolos en una lista
     public void obtenerContactos(){
         String[] projection= new String[]{ContactsContract.Data._ID,ContactsContract.Data.DISPLAY_NAME, ContactsContract.CommonDataKinds.Phone.NUMBER, ContactsContract.CommonDataKinds.Phone.TYPE};
         String where= ContactsContract.Data.MIMETYPE+"='"+ ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE+"' AND "+ ContactsContract.CommonDataKinds.Phone.NUMBER+ " IS NOT NULL";
@@ -69,11 +70,11 @@ public class MainActivity extends AppCompatActivity {
                 adaptadorContacto.notifyDataSetChanged();
             }catch (CursorIndexOutOfBoundsException ex){
                 ex.printStackTrace();
-//                Log.d("Estado",contactoCursor.getString(0));
             }
         }
     }
 
+    //Guarda la lista de contactos seleccionados en un archivo JSON, utilizando la biblioteca GSON, y SharedPreferences
     public void guardarContactos(){
         for(int i=0; i<AdaptadorContacto.contactoList.size();i++){
             if(AdaptadorContacto.contactoList.get(i).getSelected()){
@@ -93,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    //Muestra sólo una vez la actividad para guardar contactos
+    //Permite mostrar solamente una vez la actividad de guardar contactos
     public void isFirstTIme(){
         SharedPreferences preferences=getPreferences(MODE_PRIVATE);
         boolean isFirst=preferences.getBoolean("isFirst",false);
@@ -105,6 +106,8 @@ public class MainActivity extends AppCompatActivity {
         }else {
             Log.d("Estado","No es la primera vez");
             Intent intent= new Intent(MainActivity.this,RecuperaContactos.class);
+            //Banderas necesarias para no regresar a la activity de Seleccionar y guardar contactos
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
         }
     }
